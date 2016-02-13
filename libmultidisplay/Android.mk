@@ -4,55 +4,30 @@ LOCAL_PATH:= $(call my-dir)
 
 #$(warning $(TARGET_HAS_MULTIPLE_DISPLAY))
 #$(warning $(TARGET_BOARD_PLATFORM))
-
 ifeq ($(USE_MDS_LEGACY),true)
-include $(LOCAL_PATH)/ctp_legacy/Android.mk
 
-else
 ifeq ($(TARGET_HAS_MULTIPLE_DISPLAY),true)
 include $(CLEAR_VARS)
 LOCAL_COPY_HEADERS_TO := display
 LOCAL_COPY_HEADERS := \
+    native/include/IExtendDisplayListener.h \
+    native/include/IMultiDisplayComposer.h \
+    native/include/MultiDisplayClient.h \
+    native/include/MultiDisplayComposer.h \
     native/include/MultiDisplayType.h \
-    native/include/IMultiDisplayListener.h \
-    native/include/IMultiDisplayCallback.h \
-    native/include/IMultiDisplayHdmiControl.h \
-    native/include/IMultiDisplayVideoControl.h \
-    native/include/IMultiDisplayEventMonitor.h \
-    native/include/IMultiDisplaySinkRegistrar.h \
-    native/include/IMultiDisplayCallbackRegistrar.h \
-    native/include/IMultiDisplayConnectionObserver.h \
-    native/include/IMultiDisplayInfoProvider.h \
-    native/include/IMultiDisplayDecoderConfig.h \
     native/include/MultiDisplayService.h
 
 LOCAL_COPY_HEADERS += videoclient/MultiDisplayVideoClient.h
-
-ifeq ($(TARGET_HAS_ISV),true)
-LOCAL_COPY_HEADERS += \
-    native/include/IMultiDisplayVppConfig.h
-endif
-
 
 include $(BUILD_COPY_HEADERS)
 
 include $(CLEAR_VARS)
 LOCAL_SRC_FILES:= \
+    native/MultiDisplayService.cpp \
+    native/MultiDisplayClient.cpp \
+    native/IMultiDisplayComposer.cpp \
     native/MultiDisplayComposer.cpp \
-    native/IMultiDisplayListener.cpp \
-    native/IMultiDisplayCallback.cpp \
-    native/IMultiDisplayInfoProvider.cpp \
-    native/IMultiDisplayConnectionObserver.cpp \
-    native/IMultiDisplayHdmiControl.cpp \
-    native/IMultiDisplayVideoControl.cpp \
-    native/IMultiDisplayEventMonitor.cpp \
-    native/IMultiDisplaySinkRegistrar.cpp \
-    native/IMultiDisplayCallbackRegistrar.cpp \
-    native/IMultiDisplayDecoderConfig.cpp \
-    native/MultiDisplayService.cpp
-ifeq ($(TARGET_HAS_ISV),true)
-LOCAL_SRC_FILES += native/IMultiDisplayVppConfig.cpp
-endif
+    native/IExtendDisplayListener.cpp
 
 LOCAL_MODULE:= libmultidisplay
 LOCAL_MODULE_TAGS := optional
@@ -77,24 +52,18 @@ ifeq ($(ENABLE_IMG_GRAPHICS),true)
     LOCAL_SHARED_LIBRARIES += libdl
 endif
 
-ifeq ($(ENABLE_GEN_GRAPHICS),true)
-    LOCAL_SRC_FILES += \
-        native/drm_hdmi.cpp
-
-    LOCAL_C_INCLUDES = \
-        $(TARGET_OUT_HEADERS)/libdrm \
-        $(TARGET_OUT_HEADERS)/external/drm
-
-    LOCAL_SHARED_LIBRARIES += libdrm
-
-    LOCAL_CFLAGS += -DDVI_SUPPORTED -DVPG_DRM
-endif
-
-ifeq ($(TARGET_HAS_ISV),true)
-LOCAL_CFLAGS += -DTARGET_HAS_ISV
-LOCAL_C_INCLUDES += $(TARGET_OUT_HEADERS)/libmedia_utils_vpp
-LOCAL_SHARED_LIBRARIES += libvpp_setting
-endif
+#ifeq ($(ENABLE_GEN_GRAPHICS),true)
+#    LOCAL_SRC_FILES += \
+#        native/drm_hdmi.cpp
+#
+#    LOCAL_C_INCLUDES = \
+#        $(TARGET_OUT_HEADERS)/libdrm \
+#        $(TARGET_OUT_HEADERS)/external/drm
+#
+#    LOCAL_SHARED_LIBRARIES += libdrm
+#
+#    LOCAL_CFLAGS += -DDVI_SUPPORTED -DVPG_DRM
+#endif
 
 LOCAL_C_INCLUDES += $(call include-path-for, frameworks-av)
 
@@ -139,9 +108,6 @@ LOCAL_C_INCLUDES := \
      $(JNI_H_INCLUDE) \
      $(call include-path-for, frameworks-base)
 
-ifeq ($(TARGET_HAS_ISV),true)
-LOCAL_CFLAGS += -DTARGET_HAS_ISV
-endif
 LOCAL_CFLAGS += -DLOG_TAG=\"MultiDisplay\"
 
 include $(BUILD_SHARED_LIBRARY)
@@ -163,21 +129,21 @@ LOCAL_NO_EMMA_COMPILE := true
 
 include $(BUILD_JAVA_LIBRARY)
 
-else
+#else
 # ============================================================
-include $(CLEAR_VARS)
-
-LOCAL_SRC_FILES := \
-     dummy/DisplayObserver.java
-
-LOCAL_MODULE := com.intel.multidisplay
-LOCAL_MODULE_TAGS := optional
-
-LOCAL_NO_EMMA_INSTRUMENT := true
-LOCAL_NO_EMMA_COMPILE := true
-
-include $(BUILD_JAVA_LIBRARY)
-
+#include $(CLEAR_VARS)
+#
+#LOCAL_SRC_FILES := \
+#     dummy/DisplayObserver.java
+#
+#LOCAL_MODULE := com.intel.multidisplay
+#LOCAL_MODULE_TAGS := optional
+#
+#LOCAL_NO_EMMA_INSTRUMENT := true
+#LOCAL_NO_EMMA_COMPILE := true
+#
+#include $(BUILD_JAVA_LIBRARY)
+#
 endif
 include $(BUILD_DROIDDOC)
 # ===========================================================
